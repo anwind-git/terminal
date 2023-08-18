@@ -1,9 +1,13 @@
 import json
 import os
 from datetime import datetime
-datetime_now = datetime.now()
-formatted_date_time = datetime_now.strftime("%Y-%m-%d %H:%M")
 client = []
+
+
+def date_time():
+    datetime_now = datetime.now()
+    formatted_date_time = datetime_now.strftime("%Y-%m-%d %H:%M")
+    return formatted_date_time
 
 
 # чтение файла client.json
@@ -33,6 +37,7 @@ def operation_history(person):
 def record_account_json(account):
     with open('account.json', 'w') as file:
         json.dump(account, file, ensure_ascii=False)
+    file.close()
 
 
 # обновление файла account.json
@@ -41,9 +46,7 @@ def update_account_json(account):
     for existing_account in data:
         if existing_account['id'] == account['id']:
             existing_account.update(account)
-            break
-    with open('account.json', 'w') as file:
-        json.dump(data, file, ensure_ascii=False)
+    record_account_json(data)
 
 
 # форма записи в account.json
@@ -52,17 +55,17 @@ def invoice_form(person):
         'id': person['id'],
         'balance': 0,
         'number_operations': 0,
-        'data_time': str(formatted_date_time),
+        'data_time': str(date_time()),
     }]
     return account
 
 
-# форма записи в operations.json
+# а записи в operations.json
 def operation_form(person, operation):
     data = [{
         'id': person['id'],
         'operations': operation,
-        'data_time': str(formatted_date_time),
+        'data_time': str(date_time()),
     }]
     return data
 
@@ -71,6 +74,7 @@ def operation_form(person, operation):
 def open_operations_json():
     with open('operations.json', 'r') as json_file:
         operations = json.load(json_file)
+    json_file.close()
     return operations
 
 
@@ -90,6 +94,7 @@ def new_operations(person, data):
 def record_operations_json(operation):
     with open('operations.json', 'w') as file:
         json.dump(operation, file, ensure_ascii=False)
+    file.close()
 
 
 # поиск счета клиента
@@ -100,7 +105,7 @@ def customer_account_lookup(person):
             return account
 
 
-# поиск клиента
+# поиск клиента по пинкоду
 def customer_search(code_entry):
     data = open_client_json()
     for client in data:
@@ -109,7 +114,6 @@ def customer_search(code_entry):
 
 
 def person_form(Person):
-
     client.append({
         'id': Person.id_client,
         'last_name': Person.last_name,
@@ -122,3 +126,19 @@ def person_form(Person):
 
     with open('client.json', 'w') as file:
         json.dump(client, file, ensure_ascii=False)
+    file.close()
+
+
+# создание файла account.json и его первой записи
+def open_account_file():
+    try:
+        open('account.json', 'r+')
+    except FileNotFoundError:
+        data = [{
+                'id': 0,
+                'balance': 0,
+                'number_operations': 0,
+                'data_time': 0,
+            }]
+        record_account_json(data)
+
