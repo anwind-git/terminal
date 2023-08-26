@@ -1,6 +1,7 @@
 import os
 from os import system, name
 from atm import urls, open_json
+from atm.journal_printin import logging
 os.environ['TERM'] = 'xterm'
 
 
@@ -17,7 +18,7 @@ def input_pin():
         try:
             code_entry = int(input("Введите пинкод: "))
         except ValueError as e:
-            print(f"Ошибка ввода: {e}")
+            logging.error(f"Ошибка ввода: {e}")
             continue
 
         person = open_json.customer_search(code_entry)
@@ -29,10 +30,12 @@ def input_pin():
                 open_json.record_account_json(account)
             сlear()
             account = open_json.customer_account_lookup(person)
+            logging.info(f'Вход клиента: id={person["id"]}')
             print(f"Добро пожаловать! {person['last_name']} {person['first_name']} " 
             f"{person['middle_name']} | пол: {person['gender']} | год рождения: {person['birth_year']} "
             f"| Баланс: {account['balance']}$ | Последняя операция: {account['data_time']}")
             return urls.menu(person)
         else:
-            print('Клиент не существует!')
+            logging.error(f'Клиент не существует! {code_entry}')
+
 
